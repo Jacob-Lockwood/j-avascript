@@ -6,23 +6,25 @@ This project is heavily inspired by @cyoce's [J-uby](https://github.com/cyoce/J-
 
 In JavaScript, operators cannot be overloaded, and functions cannot be referenced as concisely as using Symbols is in Ruby, so I opted to use a tagged-template based syntax which is parsed from a string to a function. This also allows J-avaScript to support fork-trains, which are very useful and fun.
 
-Something which may be surprising to those familiar with J/APL is that J-avaScript's trains execute from left-to-right, rather than right-to-left. This is because JavaScript itself runs left-to-right, and makes sense if you consider that in J, writing `x F y` means you are using `x` as the argument to `F` in order to modify `y`, while in JavaScript writing `x.F(y)` means you are using `y` as the argument to `F` in order to modify `x`.
+Something which may be surprising to those familiar with J/APL is that J-S's trains execute from left-to-right, rather than right-to-left. This is because JS itself runs left-to-right, and makes sense if you consider that in J, writing `x F y` means you are using `x` as the argument to `F` in order to modify `y`, while in JS writing `x.F(y)` means you are using `y` as the argument to `F` in order to modify `x`.
 
-Here's an outline of J-avaScript's syntax:
+J-S optimizes the referencing of functions to be very concise. Writing the word `split` is equivalent to writing `(x,y)=>x.split(y)`, writing the operator `+` is equivalent to writing `(x,y)=>x+y`, writing the word `length` is equivalent to writing `(x)=>x.length`, writing `:console.log` is equivalent to writing `(x)=>console.log(x)`, and so on. Constants and anonymous functions can be referenced using the template-interpolation `${val}`. If the value is a constant, it is treated how a constant-function would be treated in trains in J.
+
+Here's an outline of J-S's components for tacit composition:
 
 ```
 conjunctions
-    F#G     y.F(G)
-    v#F     v.F(y)
-    F##v    y.F(...v)
+    F#G     x.F(G)
+    v#F     v.F(x)
+    F##v    x.F(...v)
     F@G     F(x).G(F(y))
 
 adverbs
-    /.F     y.reduce(F)
-    \.F     y."scan"(F)
-    *.F     y.map(F1)
-    '.F     y.map(F2)
-    ~.F     y.F(y) or y.F(x)
+    /.F     x.reduce(F)
+    \.F     x."scan"(F)
+    *.F     x.map(F1)
+    '.F     x.map(F2)
+    ~.F     x.F(x) or y.F(x)
 
 extra ops
     x[y     x
@@ -39,7 +41,7 @@ other syntax
 
 And here are some examples of functions written first in plain JS, and then with their tacit J-uby counterparts, sometimes with multiple options of how to write the same expression.
 
-As you can see, J-avaScript often makes the code much shorter, but in some instances can actually result in longer code, so if you're using this library for code-golf purposes, keep in mind what scenarios tend to be shorter when written explicitly rather than tacitly.
+As you can see, J-S often makes the code much shorter, but in some instances can actually result in longer code, so if you're using this library for code-golf purposes, keep in mind what scenarios tend to be shorter when written explicitly rather than tacitly.
 
 ```javascript
 x=>x+1
@@ -55,11 +57,9 @@ x=>"Hello, World!".indexOf(x)
 J`${"Hello, World!"}#indexOf`
 J`${"Hello, World!"}indexOf]`
 
-x=>x.map(z=>z**z)
-    .reduce((a,c)=>c+a)
+x=>x.map(z=>z**z).reduce((a,c)=>c+a)
 x=>x.map(z=>t+=z**z,t=0)&&t
 J`*.~.**;/.+`
-e(a("*",a("~",o("**"))),a("/",o("+")))
 
 (x,y)=>(x+y)*(x-y)
 J`+*-`
