@@ -39,7 +39,7 @@ other syntax
     F G H   fork
 ```
 
-And here are some examples of functions written first in plain JS, and then with their tacit J-uby counterparts, sometimes with multiple options of how to write the same expression.
+And here are some examples of functions written first in plain JS, and then with their tacit J-S counterparts, sometimes with multiple options of how to write the same expression.
 
 As you can see, J-S often makes the code much shorter, but in some instances can actually result in longer code, so if you're using this library for code-golf purposes, keep in mind what scenarios tend to be shorter when written explicitly rather than tacitly.
 
