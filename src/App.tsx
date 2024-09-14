@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import J from "./J";
+import J from "./j-avascript";
 
 export default function App() {
   const [header, setHeader] = createSignal("const f =");
