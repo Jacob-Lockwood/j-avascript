@@ -1,8 +1,67 @@
-export type Fn = (x?: unknown, y?: unknown) => unknown;
-const operators = new Map<string, Fn>();
-const conjunctions = new Map<string, (F: unknown, G: unknown) => Fn>();
-const adverbs = new Map<string, (F: Fn) => Fn>([
-  ["*", (f) => (a) => !Array.isArray(a) || a.map((x) => f(x))],
+export type Fn<T = unknown, K = unknown> = (x?: T, y?: T) => K;
+function range(a: number, b: number) {
+  const arr = new Array(b - a);
+  while (a < b) {
+    arr.push(a++);
+  }
+  return arr;
+}
+// deno-lint-ignore no-explicit-any
+const operators = new Map<string, Fn<any>>([
+  ["[", (x, _y) => x],
+  ["]", (x, y = x) => y],
+  ["\\", (x: number, y: number) => Math.floor(x / y)],
+  [",", (x, y) => [x, y]],
+  ["'", (x: number, y: number) => range(x, y)],
+]);
+const conjunctions = new Map<string, Fn<unknown, Fn>>([
+  [
+    "#",
+    (f, g) => {
+      if (typeof f === "function") {
+        return (x) => f(x, g);
+      } else if (typeof g === "function") {
+        return (y) => g(f, y);
+      }
+      throw new Error("At least one argument to # must be a function");
+    },
+  ],
+  [
+    "##",
+    (f, g) => {
+      if (typeof f !== "function") {
+        throw new Error("Left argument to ## must be a function");
+      }
+      if (typeof g === "function") {
+        return (x, y = x) => f(x, g(...(y as Iterable<unknown>)));
+      } else {
+        return (x, y = x) => f(x, ...(y as Iterable<unknown>));
+      }
+    },
+  ],
+  [
+    "@",
+    (f, g) => (x, y) => {
+      if (typeof f !== "function" || typeof g !== "function") {
+        throw new Error("Both arguments to @ must be functions");
+      }
+      return g(f(x), f(y));
+    },
+  ],
+]);
+
+// deno-lint-ignore no-explicit-any
+const adverbs = new Map<string, (f: Fn) => Fn<any>>([
+  ["/", (f) => (a: unknown[]) => a.reduce(f)],
+  [
+    "\\",
+    (f) =>
+      (a: unknown[], out: unknown[] = []) =>
+        a.reduce((acc, cur, i) => (out[i] = f(acc, cur))),
+  ],
+  ["*", (f) => (a: unknown[]) => a.map((x) => f(x))],
+  ["'", (f) => (a: unknown[]) => a.map((x, y) => f(x, y))],
+  ["~", (f) => (x, y) => (typeof y === "undefined" ? f(x, x) : f(y, x))],
 ]);
 
 const REG = {
@@ -11,7 +70,7 @@ const REG = {
   conj: /^##?|@/,
 } satisfies Record<string, RegExp>;
 
-export default function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
+function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
   let code = raw.join("($)");
 
   function or(fns: (() => unknown)[]) {
@@ -82,8 +141,7 @@ export default function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
     ]);
   }
   function conj() {
-    const [f, c, g] = [unit(), t(REG.conj), fn()];
-    // return `c(${f},"${c}",${g})`;
+    const [f, c, g] = [unit(), t(REG.conj), unit()];
     if (!conjunctions.has(c)) {
       throw new Error(`Conjunction \`${c}\` does not exist`);
     }
@@ -91,7 +149,6 @@ export default function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
   }
   function adv() {
     const [a, _, f] = [t(REG.op), c`.`, fn() as Fn];
-    // return `a("${a}",${f})`;
     if (!adverbs.has(a)) {
       throw new Error(`Adverb \`${a}\` does not exist`);
     }
@@ -101,7 +158,7 @@ export default function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
     return or([adv, unit]);
   }
   function train(): Fn {
-    const fns = many(() => or([fn, conj]));
+    const fns = many(() => or([conj, fn]));
     return (x, y = x) => {
       const app = (v: unknown, ifM: unknown) => {
         if (typeof v !== "function") return v;
@@ -109,14 +166,12 @@ export default function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
         return f.length === 1 ? f(ifM) : f(x, y);
       };
       const l = fns.length;
-      // console.log(l);
       if (l === 1) {
         return app(fns[0], x);
       }
       let v = l % 2 ? app(fns[0], x) : x;
       for (let i = l % 2; i < l; i += 2) {
         const [g, h] = fns.slice(i, i + 2) as [Fn, unknown];
-        // console.log(v, g, h);
         v = g(v, app(h, y));
       }
       return v;
@@ -129,3 +184,4 @@ export default function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
 
   return expr();
 }
+export default J;

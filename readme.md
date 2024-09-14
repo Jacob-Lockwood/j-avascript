@@ -49,7 +49,7 @@ J`+#${1}`
 J`${1}+]`
 J`+${1}`
 
-x=>x.reduce((a,c)=>a+c)/y.length
+x=>x.reduce((a,c)=>a+c)/x.length
 J`(reduce#+)/length`
 J`/.+/length`
 
