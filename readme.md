@@ -8,7 +8,7 @@ In JavaScript, operators cannot be overloaded, and functions cannot be reference
 
 Something which may be surprising to those familiar with J/APL is that J-S's trains execute from left-to-right, rather than right-to-left. This is because JS itself runs left-to-right, and makes sense if you consider that in J, writing `x F y` means you are using `x` as the argument to `F` in order to modify `y`, while in JS writing `x.F(y)` means you are using `y` as the argument to `F` in order to modify `x`.
 
-J-S optimizes the referencing of functions to be very concise. Writing the word `split` is equivalent to writing `(x,y)=>x.split(y)`, writing the operator `+` is equivalent to writing `(x,y)=>x+y`, writing the word `length` is equivalent to writing `(x)=>x.length`, writing `:console.log` is equivalent to writing `(x)=>console.log(x)`, and so on. Constants and anonymous functions can be referenced using the template-interpolation `${val}`. If the value is a constant, it is treated how a constant-function would be treated in trains in J.
+J-S optimizes the referencing of functions to be very concise. Writing the word `split` is equivalent to writing `(x,y)=>x.split(y)`, writing the operator `+` is equivalent to writing `(x,y)=>x+y`, writing the word `length` is equivalent to writing `(x)=>x.length`, and so on. Constants and anonymous functions can be referenced using the template-interpolation `${val}`. If the value is a constant, it is treated how a constant-function would be treated in trains in J.
 
 Here's an outline of J-S's components for tacit composition:
 
@@ -74,3 +74,7 @@ J`*.(toString${2}split${1};length)`
 x=>x.slice(0,2)+"..."+x.slice(-2)
 J`slice##${[0,2]}+${"..."}+slice#${-2}`
 ```
+
+## About this repo
+
+This repo contains the [Vite](https://vitejs.dev) and [SolidJS](https://solidjs.com) website deployed at [j-avascript.netlify.app](https://j-avascript.netlify.app). The source code for actual J-avaScript interpreter is in the file [/src/j-avascript.ts](/src/j-avascript.ts), if you need just that. I may turn this into a monorepo and publish the interpreter on NPM.
