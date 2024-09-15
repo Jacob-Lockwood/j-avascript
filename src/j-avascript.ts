@@ -1,6 +1,6 @@
 export type Fn<T = unknown, K = unknown> = (x?: T, y?: T) => K;
 function range(a: number, b: number) {
-  const arr = new Array(b - a);
+  const arr = [];
   while (a < b) {
     arr.push(a++);
   }
