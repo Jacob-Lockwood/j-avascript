@@ -18,6 +18,7 @@ const conjunctions = new Map<string, Fn<unknown, Fn>>([
   [
     "#",
     (f, g) => {
+      console.log("Right argument to #:", g);
       if (typeof f === "function") {
         return (x) => f(x, g);
       } else if (typeof g === "function") {
@@ -35,7 +36,7 @@ const conjunctions = new Map<string, Fn<unknown, Fn>>([
       if (typeof g === "function") {
         return (x, y = x) => f(x, g(...(y as Iterable<unknown>)));
       } else {
-        return (x, y = x) => f(x, ...(y as Iterable<unknown>));
+        return (x) => f(x, ...(g as Iterable<unknown>));
       }
     },
   ],
@@ -71,15 +72,18 @@ const REG = {
 } satisfies Record<string, RegExp>;
 
 function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
-  let code = raw.join("($)");
+  let code = raw.join("${}");
+  console.log(code, vals);
 
   function or(fns: (() => unknown)[]) {
     for (const fn of fns) {
-      const backup = code;
+      const codeBackup = code;
+      const valsBackup = vals.slice();
       try {
         return fn();
       } catch (_) {
-        code = backup;
+        code = codeBackup;
+        vals = valsBackup;
       }
     }
     throw new SyntaxError(`No option found near ${code.slice(0, 10)}`);
@@ -110,7 +114,10 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
 
   function unit() {
     return or([
-      () => (c("($)"), vals.shift()),
+      () => {
+        c`\${}`;
+        return vals.shift();
+      },
       () => [c`(`, expr(), c`)`][1],
       ref,
     ]);
@@ -120,6 +127,7 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
       function op() {
         const name = t(REG.op);
         return (x: unknown, y: unknown) => {
+          console.log("op", x, name, y);
           if (operators.has(name)) {
             return operators.get(name)!(x, y);
           }
@@ -133,15 +141,16 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
       function method() {
         const name = t(REG.ident);
         // deno-lint-ignore no-explicit-any
-        return (x: any, y: unknown) => {
+        return (x: any, ...y: unknown[]) => {
           const val = x[name];
-          return typeof val === "function" ? val.call(x, y) : val;
+          return typeof val === "function" ? val.apply(x, y) : val;
         };
       },
     ]);
   }
   function conj() {
     const [f, c, g] = [unit(), t(REG.conj), unit()];
+    console.log("conj");
     if (!conjunctions.has(c)) {
       throw new Error(`Conjunction \`${c}\` does not exist`);
     }
@@ -159,6 +168,7 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
   }
   function train(): Fn {
     const fns = many(() => or([conj, fn]));
+    console.log("train", fns);
     return (x, y = x) => {
       const app = (v: unknown, ifM: unknown) => {
         if (typeof v !== "function") return v;
