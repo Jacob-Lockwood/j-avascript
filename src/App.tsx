@@ -3,15 +3,15 @@ import J from "./j-avascript";
 
 export default function App() {
   const [header, setHeader] = createSignal("const f =");
-  const [code, setCode] = createSignal("J`[+${'!'}`");
-  const [footer, setFooter] = createSignal("console.log(f('hi'))");
+  const [code, setCode] = createSignal("J`,join${' '}+${'!'}`");
+  const [footer, setFooter] = createSignal("console.log(f('Hello', 'World'))");
   const program = () => header() + "\n" + code() + "\n" + footer();
   const [output, setOutput] = createSignal("");
   const [error, setError] = createSignal("");
 
   const example = (name: string, head: string, codez: string, foot: string) => (
     <button
-      class="hover:bg-rose-800 underline underline-offset-2"
+      class="hover:bg-rose-800 underline underline-offset-2 w-max flex-shrink-0"
       onClick={() => {
         setHeader(head);
         setCode(codez);
@@ -23,10 +23,10 @@ export default function App() {
   );
 
   return (
-    <main class="flex flex-col gap-2 font-mono bg-neutral-900/50 w-3/4 p-10 mx-auto min-h-screen text-rose-200">
+    <main class="flex flex-col gap-2 font-mono bg-neutral-900/50 md:w-3/4 p-10 mx-auto min-h-screen text-rose-200">
       <div class="border-2 border-solid border-rose-700 px-2 py-1 bg-neutral-900/50">
         <p>Load examples:</p>
-        <div class="flex flex-row flex-wrap gap-x-10">
+        <div class="flex overflow-x-auto gap-x-10 pb-2">
           {example(
             "Average of a List",
             "const f =",
