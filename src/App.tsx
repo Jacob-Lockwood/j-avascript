@@ -6,11 +6,9 @@ export default function App() {
   const [header, setHeader] = createSignal(
     searchParams.get("h") ?? "const f ="
   );
-  const [code, setCode] = createSignal(
-    searchParams.get("c") ?? "J`,join${', '}+${'!'}`"
-  );
+  const [code, setCode] = createSignal(searchParams.get("c") ?? "J``");
   const [footer, setFooter] = createSignal(
-    searchParams.get("f") ?? "console.log(f('Hello', 'World'))"
+    searchParams.get("f") ?? "console.log(f())"
   );
   createEffect(() => {
     const pageURL = window.location.origin + window.location.pathname;
@@ -30,9 +28,10 @@ export default function App() {
     "bg-stone-800/80 text-white p-5 w-full h-min focus:ring-0 focus:outline-none border-solid border-2 border-stone-900 focus:border-rose-600 overflow-x-scroll whitespace-pre";
   const btn =
     "border-2 border-rose-500 bg-rose-700 w-max px-10 hover:bg-rose-600 hover:text-rose-100 hover:border-rose-400";
+  const link = "hover:bg-rose-900 text-pink-300 underline underline-offset-2";
   const example = (name: string, head: string, codez: string, foot: string) => (
     <button
-      class="hover:bg-rose-800 underline underline-offset-2 w-max flex-shrink-0"
+      class={link + " flex-shrink-0"}
       onClick={() => {
         setHeader(head);
         setCode(codez);
@@ -43,11 +42,29 @@ export default function App() {
     </button>
   );
   return (
-    <main class="flex flex-col gap-2 font-mono bg-neutral-900/50 md:w-3/4 p-10 mx-auto min-h-screen text-rose-200">
+    <main class="flex flex-col gap-2 font-mono bg-neutral-900/50 md:w-3/4 p-10 mx-auto my-10 text-rose-200">
+      <h1 class="text-xl font-bold">J-avaScript</h1>
+      <p class="italic">Write JavaScript tacitly with a J-like syntax</p>
+      <p>
+        <a
+          href="https://github.com/Jacob-Lockwood/j-avascript?tab=readme-ov-file#j-avascript"
+          class="underline text-pink-300"
+        >
+          Read about J-avaScript
+        </a>{" "}
+        (github.com)
+      </p>
+      <hr class="my-8 border-rose-500" />
+
       <div class="border-2 border-solid border-rose-700 px-2 py-1 bg-neutral-900/50">
         <p>Load examples:</p>
         <div class="flex overflow-x-auto gap-x-10 pb-2">
-          {example("Hello, World!", "(", 'J`,join${", "}+${"!"}`', ")()")}
+          {example(
+            "Hello, World!",
+            "(",
+            'J`${["Hello", "World"]}join${", "}+${"!"};${x => console.log(x)}`',
+            ")()"
+          )}
           {example(
             "Average of a List",
             "const f =",
@@ -126,14 +143,14 @@ export default function App() {
         {error()}
       </textarea>
 
-      <p class="text-lg font-semibold mt-16 mb-4">Share this program</p>
+      <p class="text-lg font-bold mt-16 mb-4">Share this program</p>
       <p>URL:</p>
       <textarea class={block} readonly rows={1}>
         {location.href}
       </textarea>
       <p>Markdown (CMC):</p>
       <textarea class={block} readonly rows={1}>
-        {`J-avaScript, ${byteCount()} bytes - \`\`${code()}\`\` [try it](${location.href})`}
+        {`J-avaScript, ${byteCount()} bytes - \`\` ${code()} \`\` [try it](${location.href})`}
       </textarea>
       <p>Markdown (CGCC):</p>
       <textarea class={block} readonly rows={8}>
