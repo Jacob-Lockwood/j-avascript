@@ -6,7 +6,6 @@ function range(a: number, b: number) {
   }
   return arr;
 }
-// deno-lint-ignore no-explicit-any
 const operators = new Map<string, Fn<any>>([
   ["[", (x, _y) => x],
   ["]", (x, y = x) => y],
@@ -18,7 +17,6 @@ const conjunctions = new Map<string, Fn<unknown, Fn>>([
   [
     "#",
     (f, g) => {
-      console.log("Right argument to #:", g);
       if (typeof f === "function") {
         return (x) => f(x, g);
       } else if (typeof g === "function") {
@@ -51,7 +49,6 @@ const conjunctions = new Map<string, Fn<unknown, Fn>>([
   ],
 ]);
 
-// deno-lint-ignore no-explicit-any
 const adverbs = new Map<string, (f: Fn) => Fn<any>>([
   ["/", (f) => (a: unknown[]) => a.reduce(f)],
   [
@@ -73,7 +70,6 @@ const REG = {
 
 function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
   let code = raw.join("($)");
-  console.log(code, vals);
 
   function or(fns: (() => unknown)[]) {
     for (const fn of fns) {
@@ -127,7 +123,6 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
       function op() {
         const name = t(REG.op);
         return (x: unknown, y: unknown) => {
-          console.log("op", x, name, y);
           if (operators.has(name)) {
             return operators.get(name)!(x, y);
           }
@@ -140,7 +135,6 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
       },
       function method() {
         const name = t(REG.ident);
-        // deno-lint-ignore no-explicit-any
         return (x: any, ...y: unknown[]) => {
           const val = x[name];
           return typeof val === "function" ? val.apply(x, y) : val;
@@ -150,7 +144,6 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
   }
   function conj() {
     const [f, c, g] = [unit(), t(REG.conj), unit()];
-    console.log("conj");
     if (!conjunctions.has(c)) {
       throw new Error(`Conjunction \`${c}\` does not exist`);
     }
@@ -168,7 +161,6 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
   }
   function train(): Fn {
     const fns = many(() => or([conj, fn]));
-    console.log("train", fns);
     return (x, y = x) => {
       const app = (v: unknown, ifM: unknown) => {
         if (typeof v !== "function") return v;
