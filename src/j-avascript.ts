@@ -72,7 +72,7 @@ const REG = {
 } satisfies Record<string, RegExp>;
 
 function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
-  let code = raw.join("${}");
+  let code = raw.join("($)");
   console.log(code, vals);
 
   function or(fns: (() => unknown)[]) {
@@ -115,7 +115,7 @@ function J({ raw }: TemplateStringsArray, ...vals: unknown[]) {
   function unit() {
     return or([
       () => {
-        c`\${}`;
+        c`($)`;
         return vals.shift();
       },
       () => [c`(`, expr(), c`)`][1],
